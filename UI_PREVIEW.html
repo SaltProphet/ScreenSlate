@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenSlate UI Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            background-color: #252525;
+            padding: 20px 30px;
+            border-bottom: 2px solid #333;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .body {
+            display: flex;
+            height: 500px;
+        }
+        .panel {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .left-panel {
+            width: 300px;
+            background-color: #252525;
+            border-right: 2px solid #333;
+        }
+        .center-panel {
+            flex: 1;
+            background-color: #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .right-panel {
+            width: 300px;
+            background-color: #252525;
+            border-left: 2px solid #333;
+        }
+        .panel-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px 20px;
+        }
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .status-display {
+            text-align: center;
+        }
+        .status-icon {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+        .status-icon svg {
+            width: 100px;
+            height: 100px;
+        }
+        .status-text {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .status-description {
+            font-size: 18px;
+            color: #888;
+        }
+        .setting-item {
+            margin-bottom: 25px;
+        }
+        .setting-item label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #b0b0b0;
+            margin-bottom: 8px;
+        }
+        .setting-input {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        .toggle-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background-color: #4a90e2;
+            border-radius: 13px;
+            position: relative;
+        }
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        .footer {
+            height: 250px;
+            background-color: #1a1a1a;
+            border-top: 2px solid #333;
+        }
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            border-bottom: 1px solid #333;
+        }
+        .logs-controls {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #b0b0b0;
+        }
+        .clear-button {
+            padding: 6px 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .logs-content {
+            padding: 15px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+        }
+        .log-entry {
+            display: flex;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .log-timestamp {
+            color: #888;
+            min-width: 100px;
+        }
+        .log-level {
+            min-width: 50px;
+            font-weight: 600;
+        }
+        .log-level-info {
+            color: #4a90e2;
+        }
+        .log-message {
+            color: #e0e0e0;
+        }
+        .description {
+            padding: 30px;
+            background-color: #252525;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        .description h2 {
+            margin-bottom: 15px;
+            color: #4a90e2;
+        }
+        .description ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .description li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 1400px; margin: 0 auto;">
+        <div class="description">
+            <h2>ScreenSlate - UI Layout</h2>
+            <p>This is a preview of the ScreenSlate application UI with 4 main regions:</p>
+            <ul>
+                <li><strong>Sources List (Left)</strong>: Shows available recording sources with empty state</li>
+                <li><strong>Preview/Status (Center)</strong>: Displays recording preview or idle status</li>
+                <li><strong>Settings Panel (Right)</strong>: Configure FPS (default 30), output directory (Downloads), and microphone toggle</li>
+                <li><strong>Logs Panel (Bottom)</strong>: Timestamped logs with levels, clear button, and auto-scroll</li>
+            </ul>
+        </div>
+
+        <div class="container">
+            <div class="header">
+                <h1>ScreenSlate</h1>
+            </div>
+            
+            <div class="body">
+                <div class="left-panel panel">
+                    <div class="panel-header">Sources</div>
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        </svg>
+                        <div style="font-size: 16px; margin-bottom: 8px;">No sources available</div>
+                        <div style="font-size: 14px;">Sources will appear here when detected</div>
+                    </div>
+                </div>
+                
+                <div class="center-panel">
+                    <div class="status-display">
+                        <div class="status-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <div class="status-text">Idle</div>
+                        <div class="status-description">Ready to record</div>
+                    </div>
+                </div>
+                
+                <div class="right-panel panel">
+                    <div class="panel-header">Settings</div>
+                    <div class="setting-item">
+                        <label>Frame Rate (FPS)</label>
+                        <input type="number" class="setting-input" value="30" readonly>
+                    </div>
+                    <div class="setting-item">
+                        <label>Output Directory</label>
+                        <input type="text" class="setting-input" value="Downloads" readonly>
+                    </div>
+                    <div class="setting-item">
+                        <div class="toggle-wrapper">
+                            <label style="margin-bottom: 0;">Microphone</label>
+                            <div class="toggle">
+                                <div class="toggle-slider"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer">
+                <div class="logs-header">
+                    <h2 style="font-size: 18px; font-weight: 600;">Logs</h2>
+                    <div class="logs-controls">
+                        <label style="cursor: pointer;">
+                            <input type="checkbox" checked> Auto-scroll
+                        </label>
+                        <button class="clear-button">Clear</button>
+                    </div>
+                </div>
+                <div class="logs-content">
+                    <div class="log-entry">
+                        <span class="log-timestamp">16:49:18.825</span>
+                        <span class="log-level log-level-info">INFO</span>
+                        <span class="log-message">ScreenSlate application started</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-timestamp">16:49:18.832</span>
+                        <span class="log-level log-level-info">INFO</span>
+                        <span class="log-message">Electron version: 40.1.0</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-timestamp">16:49:18.833</span>
+                        <span class="log-level log-level-info">INFO</span>
+                        <span class="log-message">Node version: 20.18.1</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-timestamp">16:49:18.834</span>
+                        <span class="log-level log-level-info">INFO</span>
+                        <span class="log-message">Platform: linux</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

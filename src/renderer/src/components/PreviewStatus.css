@@ -1,0 +1,40 @@
+.preview-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.preview-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.status-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.status-icon {
+  margin-bottom: 20px;
+  color: #4a90e2;
+  opacity: 0.8;
+}
+
+.status-text {
+  font-size: 32px;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-bottom: 10px;
+}
+
+.status-description {
+  font-size: 18px;
+  color: #888;
+}
