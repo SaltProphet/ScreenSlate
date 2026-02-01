@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenSlate UI Preview - Updated with Recording Features</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+        }
+        .header {
+            background-color: #252525;
+            padding: 20px 30px;
+            border-bottom: 2px solid #333;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .body {
+            display: flex;
+            height: 500px;
+        }
+        .panel {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .left-panel {
+            width: 300px;
+            background-color: #252525;
+            border-right: 2px solid #333;
+        }
+        .center-panel {
+            flex: 1;
+            background-color: #1e1e1e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .right-panel {
+            width: 300px;
+            background-color: #252525;
+            border-left: 2px solid #333;
+        }
+        .panel-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .refresh-button {
+            padding: 6px 12px;
+            background: #4a90e2;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .sources-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .source-item {
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            background: #2a2a2a;
+        }
+        .source-item.selected {
+            border-color: #4a90e2;
+            background: #1a3a5a;
+        }
+        .source-thumbnail {
+            width: 100%;
+            height: 100px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        .source-name {
+            font-size: 12px;
+            color: #e0e0e0;
+            text-align: center;
+        }
+        .status-display {
+            text-align: center;
+        }
+        .status-icon {
+            color: #4a90e2;
+            margin-bottom: 20px;
+        }
+        .status-icon svg {
+            width: 80px;
+            height: 80px;
+        }
+        .status-icon.recording {
+            color: #e74c3c;
+        }
+        .recording-dot {
+            width: 40px;
+            height: 40px;
+            background: #e74c3c;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+        .status-text {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .status-description {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .record-button {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #4a90e2;
+            color: white;
+        }
+        .record-button.recording {
+            background: #e74c3c;
+        }
+        .setting-item {
+            margin-bottom: 25px;
+        }
+        .setting-item label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #b0b0b0;
+            margin-bottom: 8px;
+        }
+        .setting-input {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        .toggle-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toggle {
+            width: 50px;
+            height: 26px;
+            background-color: #4a90e2;
+            border-radius: 13px;
+            position: relative;
+        }
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        .footer {
+            height: 200px;
+            background-color: #1a1a1a;
+            border-top: 2px solid #333;
+        }
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            border-bottom: 1px solid #333;
+        }
+        .logs-controls {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #b0b0b0;
+        }
+        .clear-button {
+            padding: 6px 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .logs-content {
+            padding: 15px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            height: 148px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            display: flex;
+            gap: 12px;
+            padding: 4px 0;
+        }
+        .log-timestamp {
+            color: #888;
+            min-width: 100px;
+        }
+        .log-level {
+            min-width: 50px;
+            font-weight: 600;
+        }
+        .log-level-info { color: #4a90e2; }
+        .log-message {
+            color: #e0e0e0;
+        }
+        .description {
+            padding: 30px;
+            background-color: #252525;
+            margin: 0 auto 30px;
+            max-width: 1400px;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        .description h2 {
+            margin-bottom: 15px;
+            color: #4a90e2;
+        }
+        .description ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        .description li {
+            margin-bottom: 8px;
+        }
+        .scenario-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #4a90e2;
+        }
+    </style>
+</head>
+<body>
+    <div class="description">
+        <h2>ScreenSlate - Screen Recorder Implementation</h2>
+        <p><strong>New Features Implemented:</strong></p>
+        <ul>
+            <li><strong>Desktop Capturer Integration:</strong> IPC handlers for desktopCapturer.getSources to fetch available windows/screens</li>
+            <li><strong>Source Selection:</strong> Interactive grid displaying available sources with thumbnails (left panel)</li>
+            <li><strong>Recording Controls:</strong> Start/Stop button that changes state and appearance during recording</li>
+            <li><strong>MediaRecorder API:</strong> Uses navigator.mediaDevices.getUserMedia with chromeMediaSourceId</li>
+            <li><strong>Microphone Support:</strong> Optional microphone audio mixing when enabled in settings</li>
+            <li><strong>File Saving:</strong> Automatic save to Downloads folder with format: rec-YYYY-MM-DD-HH-mm.webm</li>
+            <li><strong>Recording Timer:</strong> Live timer showing recording duration</li>
+            <li><strong>Visual Feedback:</strong> Recording indicator with pulsing animation</li>
+            <li><strong>Logging:</strong> All operations logged in the logs panel with timestamps</li>
+        </ul>
+    </div>
+
+    <div class="scenario-title">Scenario 1: Idle State - No Source Selected</div>
+    <div class="container">
+        <div class="header">
+            <h1>ScreenSlate</h1>
+        </div>
+        
+        <div class="body">
+            <div class="left-panel panel">
+                <div class="panel-header">
+                    <span>Sources</span>
+                    <button class="refresh-button">Refresh</button>
+                </div>
+                <div class="sources-grid">
+                    <div class="source-item">
+                        <div class="source-thumbnail">[Screen 1 Preview]</div>
+                        <div class="source-name">Entire Screen</div>
+                    </div>
+                    <div class="source-item">
+                        <div class="source-thumbnail">[Window Preview]</div>
+                        <div class="source-name">Chrome - Example Page</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="center-panel">
+                <div class="status-display">
+                    <div class="status-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="status-text">Idle</div>
+                    <div class="status-description">Select a source to begin</div>
+                    <button class="record-button" style="opacity: 0.4;">Start Recording</button>
+                </div>
+            </div>
+            
+            <div class="right-panel panel">
+                <div class="panel-header">
+                    <span>Settings</span>
+                </div>
+                <div class="setting-item">
+                    <label>Frame Rate (FPS)</label>
+                    <input type="number" class="setting-input" value="30" readonly>
+                </div>
+                <div class="setting-item">
+                    <label>Output Directory</label>
+                    <input type="text" class="setting-input" value="Downloads" readonly>
+                </div>
+                <div class="setting-item">
+                    <div class="toggle-wrapper">
+                        <label style="margin-bottom: 0;">Microphone</label>
+                        <div class="toggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="logs-header">
+                <h2 style="font-size: 18px; font-weight: 600;">Logs</h2>
+                <div class="logs-controls">
+                    <label style="cursor: pointer;">
+                        <input type="checkbox" checked> Auto-scroll
+                    </label>
+                    <button class="clear-button">Clear</button>
+                </div>
+            </div>
+            <div class="logs-content">
+                <div class="log-entry">
+                    <span class="log-timestamp">16:49:18.825</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">ScreenSlate application started</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">16:49:18.900</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">Retrieved 2 sources</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scenario-title">Scenario 2: Ready State - Source Selected</div>
+    <div class="container">
+        <div class="header">
+            <h1>ScreenSlate</h1>
+        </div>
+        
+        <div class="body">
+            <div class="left-panel panel">
+                <div class="panel-header">
+                    <span>Sources</span>
+                    <button class="refresh-button">Refresh</button>
+                </div>
+                <div class="sources-grid">
+                    <div class="source-item selected">
+                        <div class="source-thumbnail">[Screen 1 Preview]</div>
+                        <div class="source-name">Entire Screen</div>
+                    </div>
+                    <div class="source-item">
+                        <div class="source-thumbnail">[Window Preview]</div>
+                        <div class="source-name">Chrome - Example Page</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="center-panel">
+                <div class="status-display">
+                    <div class="status-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="status-text">Ready</div>
+                    <div class="status-description">Click Start to begin recording</div>
+                    <button class="record-button">Start Recording</button>
+                </div>
+            </div>
+            
+            <div class="right-panel panel">
+                <div class="panel-header">
+                    <span>Settings</span>
+                </div>
+                <div class="setting-item">
+                    <label>Frame Rate (FPS)</label>
+                    <input type="number" class="setting-input" value="30" readonly>
+                </div>
+                <div class="setting-item">
+                    <label>Output Directory</label>
+                    <input type="text" class="setting-input" value="Downloads" readonly>
+                </div>
+                <div class="setting-item">
+                    <div class="toggle-wrapper">
+                        <label style="margin-bottom: 0;">Microphone</label>
+                        <div class="toggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="logs-header">
+                <h2 style="font-size: 18px; font-weight: 600;">Logs</h2>
+                <div class="logs-controls">
+                    <label style="cursor: pointer;">
+                        <input type="checkbox" checked> Auto-scroll
+                    </label>
+                    <button class="clear-button">Clear</button>
+                </div>
+            </div>
+            <div class="logs-content">
+                <div class="log-entry">
+                    <span class="log-timestamp">16:49:18.825</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">ScreenSlate application started</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">16:49:18.900</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">Retrieved 2 sources</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="scenario-title">Scenario 3: Recording State</div>
+    <div class="container">
+        <div class="header">
+            <h1>ScreenSlate</h1>
+        </div>
+        
+        <div class="body">
+            <div class="left-panel panel">
+                <div class="panel-header">
+                    <span>Sources</span>
+                    <button class="refresh-button">Refresh</button>
+                </div>
+                <div class="sources-grid">
+                    <div class="source-item selected">
+                        <div class="source-thumbnail">[Screen 1 Preview]</div>
+                        <div class="source-name">Entire Screen</div>
+                    </div>
+                    <div class="source-item">
+                        <div class="source-thumbnail">[Window Preview]</div>
+                        <div class="source-name">Chrome - Example Page</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="center-panel">
+                <div class="status-display">
+                    <div class="status-icon recording">
+                        <div class="recording-dot"></div>
+                    </div>
+                    <div class="status-text">Recording</div>
+                    <div class="status-description">Recording time: 00:42</div>
+                    <button class="record-button recording">Stop Recording</button>
+                </div>
+            </div>
+            
+            <div class="right-panel panel">
+                <div class="panel-header">
+                    <span>Settings</span>
+                </div>
+                <div class="setting-item">
+                    <label>Frame Rate (FPS)</label>
+                    <input type="number" class="setting-input" value="30" readonly>
+                </div>
+                <div class="setting-item">
+                    <label>Output Directory</label>
+                    <input type="text" class="setting-input" value="Downloads" readonly>
+                </div>
+                <div class="setting-item">
+                    <div class="toggle-wrapper">
+                        <label style="margin-bottom: 0;">Microphone</label>
+                        <div class="toggle">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="logs-header">
+                <h2 style="font-size: 18px; font-weight: 600;">Logs</h2>
+                <div class="logs-controls">
+                    <label style="cursor: pointer;">
+                        <input type="checkbox" checked> Auto-scroll
+                    </label>
+                    <button class="clear-button">Clear</button>
+                </div>
+            </div>
+            <div class="logs-content">
+                <div class="log-entry">
+                    <span class="log-timestamp">16:49:18.825</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">ScreenSlate application started</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">16:49:18.900</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">Retrieved 2 sources</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">16:50:32.150</span>
+                    <span class="log-level log-level-info">INFO</span>
+                    <span class="log-message">Recording started</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

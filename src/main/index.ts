@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, desktopCapturer } from 'electron'
-import { join } from 'path'
+import { join, isAbsolute } from 'path'
 import { IPC_CHANNELS, Settings, LogLevel, LogEntry, DesktopCapturerSource } from '../types'
 import os from 'os'
 import { writeFile } from 'fs/promises'
@@ -90,7 +90,11 @@ ipcMain.handle(IPC_CHANNELS.GET_SOURCES, async () => {
 ipcMain.handle(IPC_CHANNELS.SAVE_RECORDING, async (_, buffer: ArrayBuffer, timestamp: string) => {
   try {
     const fileName = `rec-${timestamp}.webm`
-    const filePath = join(settings.outputDir, fileName)
+    // Ensure outputDir is absolute
+    const outputDir = isAbsolute(settings.outputDir) 
+      ? settings.outputDir 
+      : join(os.homedir(), settings.outputDir)
+    const filePath = join(outputDir, fileName)
     
     await writeFile(filePath, Buffer.from(buffer))
     sendLog('info', `Recording saved: ${filePath}`)

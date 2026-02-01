@@ -7,6 +7,14 @@ interface PreviewStatusProps {
   settings: Settings
 }
 
+// Type definition for Electron-specific media constraints
+interface ElectronMediaConstraints extends MediaStreamConstraints {
+  video: {
+    chromeMediaSource: string
+    chromeMediaSourceId: string
+  }
+}
+
 const PreviewStatus: React.FC<PreviewStatusProps> = ({ sourceId, settings }) => {
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
@@ -20,6 +28,16 @@ const PreviewStatus: React.FC<PreviewStatusProps> = ({ sourceId, settings }) => 
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
+  const formatTimestamp = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    const hours = String(now.getHours()).padStart(2, '0')
+    const minutes = String(now.getMinutes()).padStart(2, '0')
+    return `${year}-${month}-${day}-${hours}-${minutes}`
+  }
+
   const startRecording = async () => {
     if (!sourceId) {
       alert('Please select a source first')
@@ -28,16 +46,14 @@ const PreviewStatus: React.FC<PreviewStatusProps> = ({ sourceId, settings }) => 
 
     try {
       // Get screen stream with the selected source
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const constraints: ElectronMediaConstraints = {
         audio: false,
         video: {
-          // @ts-ignore - chromeMediaSource and chromeMediaSourceId are Electron-specific
-          mandatory: {
-            chromeMediaSource: 'desktop',
-            chromeMediaSourceId: sourceId
-          }
+          chromeMediaSource: 'desktop',
+          chromeMediaSourceId: sourceId
         }
-      } as any)
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(constraints as any)
 
       // Add microphone audio if enabled
       if (settings.micEnabled) {
@@ -66,9 +82,8 @@ const PreviewStatus: React.FC<PreviewStatusProps> = ({ sourceId, settings }) => 
         const blob = new Blob(chunksRef.current, { type: 'video/webm' })
         const buffer = await blob.arrayBuffer()
         
-        // Generate timestamp
-        const now = new Date()
-        const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`
+        // Generate timestamp using helper function
+        const timestamp = formatTimestamp()
         
         // Save the recording
         try {
