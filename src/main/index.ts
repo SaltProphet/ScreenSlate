@@ -1,7 +1,8 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { IPC_CHANNELS, Settings, LogLevel, LogEntry } from '../types'
+import { app, BrowserWindow, ipcMain, desktopCapturer } from 'electron'
+import { join, isAbsolute } from 'path'
+import { IPC_CHANNELS, Settings, LogLevel, LogEntry, DesktopCapturerSource } from '../types'
 import os from 'os'
+import { writeFile } from 'fs/promises'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -61,6 +62,48 @@ ipcMain.handle(IPC_CHANNELS.SET_SETTINGS, (_, partialSettings: Partial<Settings>
   settings = { ...settings, ...partialSettings }
   sendLog('info', `Settings updated: ${JSON.stringify(partialSettings)}`)
   return settings
+})
+
+// Handle getting desktop capturer sources
+ipcMain.handle(IPC_CHANNELS.GET_SOURCES, async () => {
+  try {
+    const sources = await desktopCapturer.getSources({
+      types: ['window', 'screen'],
+      thumbnailSize: { width: 150, height: 150 }
+    })
+    
+    const sourceList: DesktopCapturerSource[] = sources.map(source => ({
+      id: source.id,
+      name: source.name,
+      thumbnail: source.thumbnail.toDataURL()
+    }))
+    
+    sendLog('info', `Retrieved ${sourceList.length} sources`)
+    return sourceList
+  } catch (error) {
+    sendLog('error', `Failed to get sources: ${error}`)
+    throw error
+  }
+})
+
+// Handle saving recording
+ipcMain.handle(IPC_CHANNELS.SAVE_RECORDING, async (_, buffer: ArrayBuffer, timestamp: string) => {
+  try {
+    const fileName = `rec-${timestamp}.webm`
+    // Ensure outputDir is absolute
+    const outputDir = isAbsolute(settings.outputDir) 
+      ? settings.outputDir 
+      : join(os.homedir(), settings.outputDir)
+    const filePath = join(outputDir, fileName)
+    
+    await writeFile(filePath, Buffer.from(buffer))
+    sendLog('info', `Recording saved: ${filePath}`)
+    
+    return filePath
+  } catch (error) {
+    sendLog('error', `Failed to save recording: ${error}`)
+    throw error
+  }
 })
 
 // App lifecycle

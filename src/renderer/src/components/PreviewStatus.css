@@ -27,6 +27,37 @@
   opacity: 0.8;
 }
 
+.status-icon.recording {
+  color: #e74c3c;
+}
+
+.recording-indicator {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recording-dot {
+  width: 40px;
+  height: 40px;
+  background: #e74c3c;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
 .status-text {
   font-size: 32px;
   font-weight: 600;
@@ -37,4 +68,35 @@
 .status-description {
   font-size: 18px;
   color: #888;
+  margin-bottom: 30px;
+}
+
+.record-button {
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #4a90e2;
+  color: white;
+}
+
+.record-button:hover:not(:disabled) {
+  background: #357abd;
+  transform: translateY(-2px);
+}
+
+.record-button.recording {
+  background: #e74c3c;
+}
+
+.record-button.recording:hover {
+  background: #c0392b;
+}
+
+.record-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

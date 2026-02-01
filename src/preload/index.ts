@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { ElectronAPI, IPC_CHANNELS, LogEntry, LogLevel, Settings } from '../types'
+import { ElectronAPI, IPC_CHANNELS, LogEntry, LogLevel, Settings, DesktopCapturerSource } from '../types'
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -31,6 +31,14 @@ const api: ElectronAPI = {
   
   setSettings: (settings: Partial<Settings>) => {
     return ipcRenderer.invoke(IPC_CHANNELS.SET_SETTINGS, settings)
+  },
+  
+  getSources: () => {
+    return ipcRenderer.invoke(IPC_CHANNELS.GET_SOURCES)
+  },
+  
+  saveRecording: (buffer: ArrayBuffer, timestamp: string) => {
+    return ipcRenderer.invoke(IPC_CHANNELS.SAVE_RECORDING, buffer, timestamp)
   }
 }
 

@@ -13,6 +13,7 @@ function App() {
     outputDir: 'Downloads',
     micEnabled: false
   })
+  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null)
 
   useEffect(() => {
     // Load initial settings
@@ -35,6 +36,10 @@ function App() {
     setLogs([])
   }
 
+  const handleSourceSelect = (sourceId: string) => {
+    setSelectedSourceId(sourceId)
+  }
+
   return (
     <div className="app">
       <div className="app-header">
@@ -42,10 +47,13 @@ function App() {
       </div>
       <div className="app-body">
         <div className="left-panel">
-          <SourcesList />
+          <SourcesList 
+            onSourceSelect={handleSourceSelect} 
+            selectedSourceId={selectedSourceId}
+          />
         </div>
         <div className="center-panel">
-          <PreviewStatus />
+          <PreviewStatus sourceId={selectedSourceId} settings={settings} />
         </div>
         <div className="right-panel">
           <SettingsPanel settings={settings} onChange={handleSettingsChange} />
